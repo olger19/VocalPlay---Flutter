@@ -22,7 +22,7 @@ class AudioService {
         await _audioPlayer.resume();
         _isPlaying = true;
       } catch (e) {
-        print("Error al reproducir el audio: $e");
+        //print("Error al reproducir el audio: $e");
       }
     }
   }
