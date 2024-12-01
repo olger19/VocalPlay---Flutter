@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:svg_path_parser/svg_path_parser.dart';
 import 'package:vocalplay/utils/path_transformer.dart';
 import 'package:vocalplay/utils/path_validator.dart';
 import 'package:vocalplay/utils/svg_paths.dart';
@@ -25,11 +24,12 @@ class TracingLetterViewState extends State<TracingLetterView> {
   bool _isValid = false;
 
   // SVG path data for the letter "a"
-  final String letterPath = SvgPaths.letterA;
+  final Path letterPath = SvgPaths.letterA;
 
   Path getLetterPath(Size size) {
-    final Path originalPath = parseSvgPath(letterPath);
-    return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
+    //final Path originalPath = parseSvgPath(letterPath);
+    //return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
+    return PathTransformer.scaleAndCenter(letterPath, size, scaleFactor: 0.5);
   }
 
   @override
