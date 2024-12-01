@@ -8,13 +8,14 @@ class TracingLetterView extends StatefulWidget {
   final Color strokeColor;
   final Color traceColor;
   final Path letterPath;
+  final Color toleranceColor;
 
-  const TracingLetterView({
-    super.key,
-    required this.strokeColor,
-    required this.traceColor, 
-    required this.letterPath,
-  });
+  const TracingLetterView(
+      {super.key,
+      required this.strokeColor,
+      required this.traceColor,
+      required this.letterPath,
+      required this.toleranceColor});
 
   @override
   TracingLetterViewState createState() => TracingLetterViewState();
@@ -33,7 +34,8 @@ class TracingLetterViewState extends State<TracingLetterView> {
     //return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
 
     //Path dinamico como parametro
-    return PathTransformer.scaleAndCenter(widget.letterPath, size, scaleFactor: 0.5);
+    return PathTransformer.scaleAndCenter(widget.letterPath, size,
+        scaleFactor: 0.5);
   }
 
   @override
@@ -75,7 +77,9 @@ class TracingLetterViewState extends State<TracingLetterView> {
                 letterPath: letterPath,
                 points: _points,
                 strokeColor: widget.strokeColor,
-                traceColor: widget.traceColor,
+                traceColor: widget.traceColor, 
+                toleranceColor: widget.toleranceColor,
+
               ),
               size: Size.infinite,
             ),
@@ -91,23 +95,42 @@ class _LetterPainter extends CustomPainter {
   final List<Offset> points;
   final Color strokeColor;
   final Color traceColor;
+  final Color toleranceColor;
 
   _LetterPainter({
     required this.letterPath,
     required this.points,
     required this.strokeColor,
     required this.traceColor,
+    required this.toleranceColor, 
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint letterPaint = Paint()
-      ..color = strokeColor
+    //Area de tolerancia
+    final Paint tolerancePaint = Paint()
+      ..color = toleranceColor.withOpacity(0.2)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 30.0;
+      ..strokeWidth = 50.0;
+
+    canvas.drawPath(letterPath, tolerancePaint);
+
+    final Path tolerancePath = Path();
+    for (final metric in letterPath.computeMetrics()) {
+      final extractedPath = metric.extractPath(0, metric.length);
+      tolerancePath.addPath(extractedPath, Offset.zero);
+    }
+    canvas.drawPath(tolerancePath, tolerancePaint);
+
+    //Path original Dibuja la letra
+    final Paint letterPaint = Paint()
+      ..color = strokeColor.withOpacity(1.0)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 30.0; //Trazo
 
     canvas.drawPath(letterPath, letterPaint);
 
+    //Trazo del usuario
     if (points.isNotEmpty) {
       final Paint tracePaint = Paint()
         ..color = traceColor

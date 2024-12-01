@@ -47,8 +47,9 @@ class SiguientePantalla extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) => TracingLetterView(
                   traceColor: Colors.blue,
-                  strokeColor: Colors.red,
-                  letterPath: SvgPaths.letterA,
+                  strokeColor: const Color.fromARGB(255, 248, 14, 65),
+                  letterPath: SvgPaths.letterA, 
+                  toleranceColor: const Color.fromARGB(255, 19, 2, 2),
                 )),
               );
             },
