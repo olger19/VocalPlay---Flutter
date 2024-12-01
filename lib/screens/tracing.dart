@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-//import 'package:path_drawing/path_drawing.dart';
+
 import 'package:svg_path_parser/svg_path_parser.dart';
+import 'package:vocalplay/utils/path_transformer.dart';
+import 'package:vocalplay/utils/path_validator.dart';
 import 'package:vocalplay/utils/svg_paths.dart';
 
 class TracingLetterView extends StatefulWidget {
@@ -24,50 +26,10 @@ class TracingLetterViewState extends State<TracingLetterView> {
 
   // SVG path data for the letter "a"
   final String letterPath = SvgPaths.letterA;
-  
+
   Path getLetterPath(Size size) {
-  final Path originalPath = parseSvgPath(letterPath);
-  final Rect bounds = originalPath.getBounds();
-
-  // Calcular la escala para ajustarlo al tamaño del canvas
-  final double scale = (size.width * 0.5) / bounds.width; // Ajustar al 80% del ancho disponible
-  final double scaledHeight = bounds.height * scale;
-  
-  // Trasladar el Path para centrarlo horizontal y verticalmente
-  final double dx = (size.width - bounds.width * scale) / 2;
-  final double dy = (size.height - scaledHeight) / 2;
-
-  final Matrix4 matrix = Matrix4.identity()
-    ..scale(scale, scale)
-    ..translate(dx / scale - bounds.left, dy / scale - bounds.top);
-
-  return originalPath.transform(matrix.storage);
-}
-
-  bool validateTracing(List<Offset> userPoints, Path letterPath) {
-    const tolerance = 20.0;
-    int validPoints = 0;
-
-    for (final point in userPoints) {
-      if (letterPath.contains(point) || 
-          isPointNearPath(point, letterPath, tolerance)) {
-        validPoints++;
-      }
-    }
-
-    return validPoints >= userPoints.length * 0.9;
-  }
-
-  bool isPointNearPath(Offset point, Path path, double tolerance) {
-    for (final metric in path.computeMetrics()) {
-      for (double distance = 0; distance <= metric.length; distance += 1) {
-        final tangent = metric.getTangentForOffset(distance);
-        if (tangent != null && (tangent.position - point).distance <= tolerance) {
-          return true;
-        }
-      }
-    }
-    return false;
+    final Path originalPath = parseSvgPath(letterPath);
+    return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
   }
 
   @override
@@ -78,7 +40,7 @@ class TracingLetterViewState extends State<TracingLetterView> {
         builder: (context, constraints) {
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
           final letterPath = getLetterPath(size);
-      
+
           return GestureDetector(
             onPanStart: (details) {
               setState(() {
@@ -96,10 +58,12 @@ class TracingLetterViewState extends State<TracingLetterView> {
             onPanEnd: (details) {
               setState(() {
                 _isTracing = false;
-                _isValid = validateTracing(_points, letterPath);
+                _isValid = PathValidator.validateTracing(_points, letterPath);
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(_isValid ? 'Trazo válido!' : 'Trazo incorrecto')),
+                SnackBar(
+                    content:
+                        Text(_isValid ? 'Trazo válido!' : 'Trazo incorrecto')),
               );
             },
             child: CustomPaint(
