@@ -41,7 +41,7 @@ class TrazoVocalPantallaState extends State<TrazoVocalPantalla> {
         onPressed: () {
           setState(() {
             points.clear(); // Limpiar los trazos
-            print("Puntos borrados"); // Depuración
+            //print("Puntos borrados"); // Depuración
           });
         },
         child: const Icon(Icons.clear),

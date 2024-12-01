@@ -17,7 +17,7 @@ class ActividadUnoPantallaState extends State<ActividadUnoPantallaTres> {
 
   // Controlador de la imagen
   late Image _image;
-  late ImageInfo _imageInfo;
+  ImageInfo? _imageInfo;
 
   @override
   void initState() {

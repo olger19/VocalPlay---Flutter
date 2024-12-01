@@ -22,8 +22,7 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
       _startListening(); // Si el permiso es concedido, empezar a escuchar
     } else {
       // Si no se concede el permiso, mostrar un mensaje o realizar alguna acción
-      if (!mounted)
-        return; // Verificamos si el widget sigue montado antes de usar el contexto
+      if (!mounted) return; // Verificamos si el widget sigue montado antes de usar el contexto
       showDialog(
         context: context,
         builder: (context) {
@@ -58,7 +57,7 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
               .trim()
               .toLowerCase(); // Limpiar el texto y convertirlo a minúsculas
         });
-        print("Texto reconocido: $_text"); // Imprimir para debug
+        //print("Texto reconocido: $_text"); // Imprimir para debug
 
         if (_text.isNotEmpty && _text[0] == expectedVocal) {
           // Si el texto coincide con la vocal esperada
