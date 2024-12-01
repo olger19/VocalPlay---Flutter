@@ -7,11 +7,13 @@ import 'package:vocalplay/utils/svg_paths.dart';
 class TracingLetterView extends StatefulWidget {
   final Color strokeColor;
   final Color traceColor;
+  final Path letterPath;
 
   const TracingLetterView({
     super.key,
     required this.strokeColor,
-    required this.traceColor,
+    required this.traceColor, 
+    required this.letterPath,
   });
 
   @override
@@ -29,7 +31,9 @@ class TracingLetterViewState extends State<TracingLetterView> {
   Path getLetterPath(Size size) {
     //final Path originalPath = parseSvgPath(letterPath);
     //return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
-    return PathTransformer.scaleAndCenter(letterPath, size, scaleFactor: 0.5);
+
+    //Path dinamico como parametro
+    return PathTransformer.scaleAndCenter(widget.letterPath, size, scaleFactor: 0.5);
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vocalplay/utils/svg_paths.dart';
 //import 'package:vocalplay/screens/cuadro_pantalla.dart';
 import 'actividades_cuatro.dart';
 import 'tracing.dart'; // Importa la nueva pantalla de trazo
@@ -44,9 +45,10 @@ class SiguientePantalla extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TracingLetterView(
+                MaterialPageRoute(builder: (context) => TracingLetterView(
                   traceColor: Colors.blue,
                   strokeColor: Colors.red,
+                  letterPath: SvgPaths.letterA,
                 )),
               );
             },
