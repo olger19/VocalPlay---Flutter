@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 //import 'package:flutter/services.dart';
-import 'package:vocalplay/screens/configuracion_pantalla.dart'; 
 
+
+import 'package:vocalplay/screens/configuracion_pantalla.dart';
+import 'package:vocalplay/screens/progress_provider.dart'; 
 import 'package:vocalplay/screens/screen_type.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ProgressProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -115,9 +123,4 @@ class Inicio extends StatelessWidget {
 }
 
 
-// Todo: agrega más pantallas según tus necesidades.
-
-
-
-
-
+// Todo: agrega más pantallas según tus necesidades
