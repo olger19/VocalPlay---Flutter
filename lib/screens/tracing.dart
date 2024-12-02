@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:vocalplay/utils/path_transformer.dart';
 import 'package:vocalplay/utils/path_validator.dart';
-import 'package:vocalplay/utils/svg_paths.dart';
 
 class TracingLetterView extends StatefulWidget {
   final Color strokeColor;
@@ -26,16 +26,11 @@ class TracingLetterViewState extends State<TracingLetterView> {
   bool _isTracing = false;
   bool _isValid = false;
 
-  // SVG path data for the letter "a"
-  final Path letterPath = SvgPaths.letterA;
+  bool _showSuccessAnimation = false;
+  bool _showErrorAnimation = false;
 
   Path getLetterPath(Size size) {
-    //final Path originalPath = parseSvgPath(letterPath);
-    //return PathTransformer.scaleAndCenter(originalPath, size, scaleFactor: 0.5);
-
-    //Path dinamico como parametro
-    return PathTransformer.scaleAndCenter(widget.letterPath, size,
-        scaleFactor: 0.5);
+    return PathTransformer.scaleAndCenter(widget.letterPath, size, scaleFactor: 0.5);
   }
 
   @override
@@ -65,23 +60,45 @@ class TracingLetterViewState extends State<TracingLetterView> {
               setState(() {
                 _isTracing = false;
                 _isValid = PathValidator.validateTracing(_points, letterPath);
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text(_isValid ? 'Trazo válido!' : 'Trazo incorrecto')),
-              );
-            },
-            child: CustomPaint(
-              painter: _LetterPainter(
-                letterPath: letterPath,
-                points: _points,
-                strokeColor: widget.strokeColor,
-                traceColor: widget.traceColor, 
-                toleranceColor: widget.toleranceColor,
 
-              ),
-              size: Size.infinite,
+                if (_isValid) {
+                  _showSuccessAnimation = true;
+                  _showErrorAnimation = false;
+                } else {
+                  _showErrorAnimation = true;
+                  _showSuccessAnimation = false;
+                }
+
+                // Ocultar las animaciones después de 2 segundos
+                Future.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    _showSuccessAnimation = false;
+                    _showErrorAnimation = false;
+                  });
+                });
+              });
+            },
+            child: Stack(
+              children: [
+                CustomPaint(
+                  painter: _LetterPainter(
+                    letterPath: letterPath,
+                    points: _points,
+                    strokeColor: widget.strokeColor,
+                    traceColor: widget.traceColor,
+                    toleranceColor: widget.toleranceColor,
+                  ),
+                  size: Size.infinite,
+                ),
+                if (_showSuccessAnimation)
+                  Center(
+                    child: Lottie.asset('assets/animations/applause.json', width: 200, height: 200),
+                  ),
+                if (_showErrorAnimation)
+                  Center(
+                    child: Lottie.asset('assets/animations/error.json', width: 200, height: 200),
+                  ),
+              ],
             ),
           );
         },
@@ -102,7 +119,7 @@ class _LetterPainter extends CustomPainter {
     required this.points,
     required this.strokeColor,
     required this.traceColor,
-    required this.toleranceColor, 
+    required this.toleranceColor,
   });
 
   @override
@@ -148,5 +165,7 @@ class _LetterPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _LetterPainter oldDelegate) {
+    return oldDelegate.points != points || oldDelegate.letterPath != letterPath;
+  }
 }
