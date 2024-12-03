@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class ActividadDosPantallaTres extends StatefulWidget {
   const ActividadDosPantallaTres({super.key});
@@ -9,17 +10,17 @@ class ActividadDosPantallaTres extends StatefulWidget {
 }
 
 class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
-  // Mapa para rastrear qué elementos se han emparejado correctamente
   final Map<String, String> _matches = {};
 
-  // Lista de vocales y sus pares correspondientes
   final List<Map<String, String>> _pairs = [
     {'vocal': 'a', 'imagen': 'assets/images/ajedrez.jpeg'},
     {'vocal': 'e', 'imagen': 'assets/images/estrella.png'},
     {'vocal': 'u', 'imagen': 'assets/images/uva.png'},
   ];
 
-  // Función para verificar si todas las vocales han sido emparejadas correctamente
+  bool _showAnimation = false; // Estado para mostrar animación
+  String _animationPath = ''; // Ruta de la animación a mostrar
+
   bool _isCompleted() {
     for (var pair in _pairs) {
       if (_matches[pair['vocal']!] != pair['imagen']) {
@@ -29,25 +30,20 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
     return true;
   }
 
-  void _showResult(BuildContext context) {
-    final isCorrect = _isCompleted();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isCorrect ? '¡Correcto!' : 'Inténtalo de nuevo'),
-        content: Text(
-          isCorrect
-              ? '¡Todas las vocales están correctamente emparejadas!'
-              : 'Algunos emparejamientos son incorrectos. Por favor, inténtalo nuevamente.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+  void _triggerAnimation(String animationPath) {
+    setState(() {
+      _animationPath = animationPath;
+      _showAnimation = true;
+    });
+
+    // Ocultar animación después de 2 segundos
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showAnimation = false;
+        });
+      }
+    });
   }
 
   @override
@@ -56,60 +52,65 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
       appBar: AppBar(
         title: const Text('Une las vocales'),
       ),
-      body: SingleChildScrollView(
-        // Agregado SingleChildScrollView
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Sección de arrastrar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _pairs.map((pair) {
-                return Draggable<String>(
-                  data: pair['imagen'],
-                  feedback: _buildVocalBox(pair['vocal']!, isDragging: true),
-                  childWhenDragging:
-                      _buildVocalBox(pair['vocal']!, isDragging: true),
-                  child: _buildVocalBox(pair['vocal']!),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 50),
-            // Sección de soltar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _pairs.map((pair) {
-                return DragTarget<String>(
-                  builder: (context, candidateData, rejectedData) {
-                    return _buildImageBox(
-                      pair['imagen']!,
-                      _matches[pair['vocal']] == pair['imagen'],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: _pairs.map((pair) {
+                    return Draggable<String>(
+                      data: pair['imagen'],
+                      feedback: _buildVocalBox(pair['vocal']!, isDragging: true),
+                      childWhenDragging:
+                          _buildVocalBox(pair['vocal']!, isDragging: true),
+                      child: _buildVocalBox(pair['vocal']!),
                     );
-                  },
-                  onAcceptWithDetails: (details) {
-                    setState(() {
-                      // Registrar el emparejamiento
-                      _matches[pair['vocal']!] = details.data;
+                  }).toList(),
+                ),
+                const SizedBox(height: 50),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: _pairs.map((pair) {
+                    return DragTarget<String>(
+                      builder: (context, candidateData, rejectedData) {
+                        return _buildImageBox(
+                          pair['imagen']!,
+                          _matches[pair['vocal']] == pair['imagen'],
+                        );
+                      },
+                      onAcceptWithDetails: (details) {
+                        setState(() {
+                          _matches[pair['vocal']!] = details.data;
 
-                      // Validar automáticamente si todo está completo
-                      if (_isCompleted() && mounted) {
-                        _showResult(context); // Llamada directa sin async gap
-                      }
-                    });
-                  },
-                );
-              }).toList(),
+                          // Verificar si todos los emparejamientos están completos
+                          if (_isCompleted()) {
+                            _triggerAnimation('assets/animations/applause.json');
+                          } else if (!_matches.values
+                              .contains(pair['imagen'])) {
+                            _triggerAnimation('assets/animations/error.json');
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 50),
+              ],
             ),
-            const SizedBox(height: 50),
-            // Botón para validar
-            ElevatedButton(
-              onPressed: () {
-                // Ya no es necesario validar manualmente si es automático
-              },
-              child: const Text('Validar'),
+          ),
+          // Mostrar animación en pantalla
+          if (_showAnimation)
+            Center(
+              child: Lottie.asset(
+                _animationPath,
+                width: 200,
+                height: 200,
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

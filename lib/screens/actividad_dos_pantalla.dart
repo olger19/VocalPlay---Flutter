@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt; //API
-import 'package:permission_handler/permission_handler.dart'; // Importa permission_handler
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:lottie/lottie.dart';
 
 class ActividadDosPantalla extends StatefulWidget {
   const ActividadDosPantalla({super.key});
@@ -15,14 +16,17 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
   bool _isListening = false;
   String expectedVocal = 'a'; // Vocal esperada para la validación
 
+  // Animaciones
+  bool _showAnimation = false;
+  String _animationPath = '';
+
   // Solicitar permiso de grabación de audio
   Future<void> _requestPermission() async {
     PermissionStatus status = await Permission.microphone.request();
     if (status.isGranted) {
-      _startListening(); // Si el permiso es concedido, empezar a escuchar
+      _startListening();
     } else {
-      // Si no se concede el permiso, mostrar un mensaje o realizar alguna acción
-      if (!mounted) return; // Verificamos si el widget sigue montado antes de usar el contexto
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (context) {
@@ -57,29 +61,13 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
               .trim()
               .toLowerCase(); // Limpiar el texto y convertirlo a minúsculas
         });
-        //print("Texto reconocido: $_text"); // Imprimir para debug
 
-        if (_text.isNotEmpty && _text[0] == expectedVocal) {
-          // Si el texto coincide con la vocal esperada
-          if (!mounted) return;
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('¡Correcto!'),
-                content:
-                    const Text('¡Bien hecho, has dicho la vocal correcta!'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
+        if (_text.isNotEmpty) {
+          if (_text[0] == expectedVocal) {
+            _triggerAnimation('assets/animations/applause.json'); // Animación correcta
+          } else {
+            _triggerAnimation('assets/animations/error.json'); // Animación incorrecta
+          }
         }
       });
     } else {
@@ -97,34 +85,63 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
     _speech.stop();
   }
 
+  // Mostrar animación
+  void _triggerAnimation(String animationPath) {
+    setState(() {
+      _animationPath = animationPath;
+      _showAnimation = true;
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showAnimation = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Repetir Vocal'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Pronuncia la vocal: $expectedVocal',
-              style: const TextStyle(fontSize: 24.0),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Pronuncia la vocal: $expectedVocal',
+                  style: const TextStyle(fontSize: 24.0),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Resultado: $_text',
+                  style: const TextStyle(fontSize: 20.0, color: Colors.blue),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _isListening
+                      ? _stopListening
+                      : _requestPermission,
+                  child: Text(_isListening ? 'Detener' : 'Escuchar'),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Resultado: $_text',
-              style: const TextStyle(fontSize: 20.0, color: Colors.blue),
+          ),
+          // Animación superpuesta
+          if (_showAnimation)
+            Center(
+              child: Lottie.asset(
+                _animationPath,
+                width: 200,
+                height: 200,
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isListening
-                  ? _stopListening
-                  : _requestPermission, // Solicita el permiso cuando se presiona el botón
-              child: Text(_isListening ? 'Detener' : 'Escuchar'),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

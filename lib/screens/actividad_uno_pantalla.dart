@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class ActividadUnoPantalla extends StatefulWidget {
   const ActividadUnoPantalla({super.key});
@@ -18,9 +19,29 @@ class _ActividadUnoPantallaState extends State<ActividadUnoPantalla> {
   // Respuestas del usuario
   final Map<String, String> userAnswers = {};
 
+  // Animaciones
+  bool _showAnimation = false;
+  String _animationPath = '';
+
   // Verifica si la validación debe realizarse
   bool isValidationComplete() {
     return userAnswers.length == items.length;
+  }
+
+  // Función para mostrar animación
+  void _triggerAnimation(String animationPath) {
+    setState(() {
+      _animationPath = animationPath;
+      _showAnimation = true;
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _showAnimation = false;
+        });
+      }
+    });
   }
 
   @override
@@ -29,60 +50,73 @@ class _ActividadUnoPantallaState extends State<ActividadUnoPantalla> {
       appBar: AppBar(
         title: const Text('Relacionar'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: Stack(
         children: [
-          // Zona de frutas para arrastrar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: items.keys.map((imagePath) {
-              return Draggable<String>(
-                data: imagePath,
-                feedback: _buildImageWidget(imagePath),
-                childWhenDragging: Opacity(
-                  opacity: 0.5,
-                  child: _buildImageWidget(imagePath),
-                ),
-                child: _buildImageWidget(imagePath),
-              );
-            }).toList(),
-          ),
-          // Zona de números para soltar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: items.values.map((number) {
-              return DragTarget<String>(
-                onAcceptWithDetails: (details) {
-                  setState(() {
-                    userAnswers[details.data] = number;
-                  });
-
-                  // Verifica si todas las relaciones están completadas
-                  if (isValidationComplete()) {
-                    _validarRespuestas();
-                  }
-                },
-                builder: (context, candidateData, rejectedData) {
-                  return Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: userAnswers.containsValue(number)
-                          ? Colors.green[100]
-                          : Colors.grey[200],
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Zona de frutas para arrastrar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: items.keys.map((imagePath) {
+                  return Draggable<String>(
+                    data: imagePath,
+                    feedback: _buildImageWidget(imagePath),
+                    childWhenDragging: Opacity(
+                      opacity: 0.5,
+                      child: _buildImageWidget(imagePath),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      number,
-                      style: const TextStyle(fontSize: 24),
-                    ),
+                    child: _buildImageWidget(imagePath),
                   );
-                },
-              );
-            }).toList(),
+                }).toList(),
+              ),
+              // Zona de números para soltar
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: items.values.map((number) {
+                  return DragTarget<String>(
+                    onAcceptWithDetails: (details) {
+                      setState(() {
+                        userAnswers[details.data] = number;
+                      });
+
+                      // Verifica si todas las relaciones están completadas
+                      if (isValidationComplete()) {
+                        _validarRespuestas();
+                      }
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: userAnswers.containsValue(number)
+                              ? Colors.green[100]
+                              : Colors.grey[200],
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          number,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
+          // Mostrar animación si corresponde
+          if (_showAnimation)
+            Center(
+              child: Lottie.asset(
+                _animationPath,
+                width: 200,
+                height: 200,
+              ),
+            ),
         ],
       ),
     );
@@ -106,25 +140,11 @@ class _ActividadUnoPantallaState extends State<ActividadUnoPantalla> {
       }
     });
 
-    // Mostrar pop-up con el resultado
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(esCorrecto ? '¡Correcto!' : 'Incorrecto'),
-          content: Text(esCorrecto
-              ? '¡Felicidades, todas las relaciones son correctas!'
-              : 'Algunas relaciones son incorrectas. Intenta de nuevo.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    );
+    // Disparar la animación correspondiente
+    if (esCorrecto) {
+      _triggerAnimation('assets/animations/applause.json');
+    } else {
+      _triggerAnimation('assets/animations/error.json');
+    }
   }
 }

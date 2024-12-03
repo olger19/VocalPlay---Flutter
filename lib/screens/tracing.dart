@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart'; // Importa Provider
+
 import 'progress_provider.dart'; // Importa el ProgressProvider
 import 'package:vocalplay/utils/path_transformer.dart';
 import 'package:vocalplay/utils/path_validator.dart';
