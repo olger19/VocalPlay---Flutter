@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vocalplay/screens/robot_guide.dart';
 
 class ActividadUnoPantalla extends StatefulWidget {
   const ActividadUnoPantalla({super.key});
@@ -43,6 +44,9 @@ class _ActividadUnoPantallaState extends State<ActividadUnoPantalla> {
       }
     });
   }
+
+  // Variable para controlar la visibilidad del robot
+  bool _showRobotGuide = true;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +119,29 @@ class _ActividadUnoPantallaState extends State<ActividadUnoPantalla> {
                 _animationPath,
                 width: 200,
                 height: 200,
+              ),
+            ),
+          if (_showRobotGuide)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showRobotGuide =
+                          false; // Cambiar a false para ocultar el robot
+                    });
+                  },
+                  child: SizedBox(
+                    height: 150,
+                    child: RobotGuide(
+                      message:
+                          "¡Diviértete Relacionando! Arrastra la imagen con la cantidad correspondiente.",
+                      animationPath: 'assets/animations/dino.json',
+                    ),
+                  ),
+                ),
               ),
             ),
         ],

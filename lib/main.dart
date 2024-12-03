@@ -42,8 +42,13 @@ class Inicio extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('VocalPlay'),
-        backgroundColor: const Color.fromARGB(255, 71, 166, 243),// Sin sombra en el AppBar
+        title: Image.asset(
+          'assets/icon/logo-copy.png', // Ruta de tu logo PNG
+          width: 40,
+          height: 40, // Ajusta el tamaño de la imagen
+        ),
+
+        backgroundColor: const Color.fromARGB(228, 46, 159, 224),// Sin sombra en el AppBar
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

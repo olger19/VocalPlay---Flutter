@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vocalplay/screens/robot_guide.dart';
 
 class ActividadDosPantallaTres extends StatefulWidget {
   const ActividadDosPantallaTres({super.key});
@@ -20,7 +21,8 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
 
   bool _showAnimation = false; // Estado para mostrar animación
   String _animationPath = ''; // Ruta de la animación a mostrar
-
+  // Variable para controlar la visibilidad del robot
+  bool _showRobotGuide = true;
   bool _isCompleted() {
     for (var pair in _pairs) {
       if (_matches[pair['vocal']!] != pair['imagen']) {
@@ -63,7 +65,8 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
                   children: _pairs.map((pair) {
                     return Draggable<String>(
                       data: pair['imagen'],
-                      feedback: _buildVocalBox(pair['vocal']!, isDragging: true),
+                      feedback:
+                          _buildVocalBox(pair['vocal']!, isDragging: true),
                       childWhenDragging:
                           _buildVocalBox(pair['vocal']!, isDragging: true),
                       child: _buildVocalBox(pair['vocal']!),
@@ -87,7 +90,8 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
 
                           // Verificar si todos los emparejamientos están completos
                           if (_isCompleted()) {
-                            _triggerAnimation('assets/animations/applause.json');
+                            _triggerAnimation(
+                                'assets/animations/applause.json');
                           } else if (!_matches.values
                               .contains(pair['imagen'])) {
                             _triggerAnimation('assets/animations/error.json');
@@ -108,6 +112,29 @@ class _ActividadDosPantallaTresState extends State<ActividadDosPantallaTres> {
                 _animationPath,
                 width: 200,
                 height: 200,
+              ),
+            ),
+          if (_showRobotGuide)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showRobotGuide =
+                          false; // Cambiar a false para ocultar el robot
+                    });
+                  },
+                  child: SizedBox(
+                    height: 150,
+                    child: RobotGuide(
+                      message:
+                          "¡Diviértete uniendo! Arrastra la vocal hacia la imagen correspondiente.",
+                      animationPath: 'assets/animations/dino.json',
+                    ),
+                  ),
+                ),
               ),
             ),
         ],

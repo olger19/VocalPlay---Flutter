@@ -88,6 +88,8 @@ flutter:
     - assets/audio/1audio.mp3
     - assets/animations/applause.json
     - assets/animations/error.json
+    - assets/animations/dino.json
+    - assets/icon/logo-copy.png
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

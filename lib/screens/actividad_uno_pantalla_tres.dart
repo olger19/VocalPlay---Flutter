@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vocalplay/screens/robot_guide.dart';
 
 // Pantalla para "Actividad 1"
 class ActividadUnoPantallaTres extends StatefulWidget {
@@ -18,6 +19,9 @@ class ActividadUnoPantallaState extends State<ActividadUnoPantallaTres> {
   // Controlador de la imagen
   late Image _image;
   ImageInfo? _imageInfo;
+
+  // Variable para controlar la visibilidad del robot
+  bool _showRobotGuide = true;
 
   @override
   void initState() {
@@ -55,7 +59,7 @@ class ActividadUnoPantallaState extends State<ActividadUnoPantallaTres> {
         title: const Text('Colorea'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.cleaning_services), //Cambiar icono aqui
+            icon: const Icon(Icons.cleaning_services), // Cambiar icono aquí
             onPressed: () {
               setState(() {
                 _trazos.clear(); // Limpiar trazos
@@ -65,61 +69,92 @@ class ActividadUnoPantallaState extends State<ActividadUnoPantallaTres> {
           ),
         ],
       ),
-      body: Row(
+      body: Stack(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  // Agregar puntos donde el usuario toca para pintar
-                  if (_trazos.isEmpty || _trazos.last.color != _brushColor) {
-                    _trazos.add(Trazo(_brushColor, [details.localPosition]));
-                  } else {
-                    _trazos.last.points.add(
-                        details.localPosition); // Añadir puntos al último trazo
-                  }
-                });
-              },
-              onPanEnd: (details) {
-                _trazos.add(Trazo(_brushColor,
-                    [])); // Añadir un nuevo trazo al finalizar el dibujo
-              },
-              child: CustomPaint(
-                painter: DibujoPainter(_trazos, _imageInfo),
-                size: Size.infinite,
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      // Agregar puntos donde el usuario toca para pintar
+                      if (_trazos.isEmpty ||
+                          _trazos.last.color != _brushColor) {
+                        _trazos
+                            .add(Trazo(_brushColor, [details.localPosition]));
+                      } else {
+                        _trazos.last.points.add(details
+                            .localPosition); // Añadir puntos al último trazo
+                      }
+                    });
+                  },
+                  onPanEnd: (details) {
+                    _trazos.add(Trazo(_brushColor,
+                        [])); // Añadir un nuevo trazo al finalizar el dibujo
+                  },
+                  child: CustomPaint(
+                    painter: DibujoPainter(_trazos, _imageInfo),
+                    size: Size.infinite,
+                  ),
+                ),
               ),
-            ),
-          ),
-          // Panel de colores en el lado derecho con desplazamiento
-          Container(
-            width: 60,
-            color: Colors.grey[200],
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: colorOptions
-                    .map(
-                      (color) => GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _brushColor = color; // Cambiar el color del pincel
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(5.0),
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
+              // Panel de colores en el lado derecho con desplazamiento
+              Container(
+                width: 60,
+                color: Colors.grey[200],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: colorOptions
+                        .map(
+                          (color) => GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _brushColor =
+                                    color; // Cambiar el color del pincel
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.all(5.0),
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Mostrar el RobotGuide solo si _showRobotGuide es true
+          if (_showRobotGuide)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showRobotGuide =
+                          false; // Cambiar a false para ocultar el robot
+                    });
+                  },
+                  child: SizedBox(
+                    height: 150,
+                    child: RobotGuide(
+                      message:
+                          "¡Diviértete coloreando! Usa los colores en el panel para pintar.",
+                      animationPath: 'assets/animations/dino.json',
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vocalplay/screens/robot_guide.dart';
 
 class ActividadDosPantalla extends StatefulWidget {
   const ActividadDosPantalla({super.key});
@@ -64,9 +65,11 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
 
         if (_text.isNotEmpty) {
           if (_text[0] == expectedVocal) {
-            _triggerAnimation('assets/animations/applause.json'); // Animación correcta
+            _triggerAnimation(
+                'assets/animations/applause.json'); // Animación correcta
           } else {
-            _triggerAnimation('assets/animations/error.json'); // Animación incorrecta
+            _triggerAnimation(
+                'assets/animations/error.json'); // Animación incorrecta
           }
         }
       });
@@ -101,6 +104,8 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
     });
   }
 
+  // Variable para controlar la visibilidad del robot
+  bool _showRobotGuide = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,9 +129,7 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _isListening
-                      ? _stopListening
-                      : _requestPermission,
+                  onPressed: _isListening ? _stopListening : _requestPermission,
                   child: Text(_isListening ? 'Detener' : 'Escuchar'),
                 ),
               ],
@@ -139,6 +142,30 @@ class ActividadDosPantallaState extends State<ActividadDosPantalla> {
                 _animationPath,
                 width: 200,
                 height: 200,
+              ),
+            ),
+          // Mostrar el RobotGuide solo si _showRobotGuide es true
+          if (_showRobotGuide)
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showRobotGuide =
+                          false; // Cambiar a false para ocultar el robot
+                    });
+                  },
+                  child: SizedBox(
+                    height: 150,
+                    child: RobotGuide(
+                      message:
+                          "¡Hola! Repite la vocal, presiona en el boton escuchar.",
+                      animationPath: 'assets/animations/dino.json',
+                    ),
+                  ),
+                ),
               ),
             ),
         ],
